@@ -25,22 +25,54 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format.value;
+package com.nuodb.migrator.jdbc.type;
 
-import static com.nuodb.migrator.jdbc.dialect.OracleDialect.*;
+import static java.sql.Types.OTHER;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.dialect.DialectResolver;
+import com.nuodb.migrator.jdbc.dialect.SimpleDialectResolver;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 
 /**
- * @author Sergey Bushik
+ * @author Mukund
  */
-public class OracleValueFormatRegistry extends SimpleValueFormatRegistry {
+public class JdbcTypeAliasMapTest {
 
-    public OracleValueFormatRegistry() {
-        addValueFormat(BFILE_DESC, new OracleBFileTypeValueFormat());
-        addValueFormat(ANYDATA_DESC, new OracleAnyDataValueFormat());
-        addValueFormat(ANYTYPE_DESC, new OracleAnyTypeValueFormat());
-        addValueFormat(XMLTYPE_DESC, new OracleXmlTypeValueFormat());
-        addValueFormat(USER_DEFINED_VARRAY_DESC, new OracleVarrayTypeValueFormat());
-        addValueFormat(USER_DEFINED_STRUCT_DESC, new OracleStructTypeValueFormat());
-        addValueFormat(USER_DEFINED_REF_DESC, new OracleRefTypeValueFormat());
+    private DialectResolver dialectResolver;
+    private Dialect dialectNuoDB;
+
+    @BeforeMethod
+    public void init() {
+        dialectResolver = new SimpleDialectResolver();
+        dialectNuoDB = dialectResolver.resolve(new DatabaseInfo(
+                "NuoDB"));
+    }
+
+    @Test(dataProvider = "getTypeAliasName")
+    public void testJdbcTypeAlias(JdbcType jdbcType) {
+        String actual = dialectNuoDB.getTypeName(new DatabaseInfo("Oracle"), jdbcType);
+        Assert.assertEquals(actual,"BLOB" );
+    }
+
+    @DataProvider(name = "getTypeAliasName")
+    public Object[][] createGetTypeNameData() {
+        return new Object[][] {
+                { getJdbcType(OTHER,"ARRAY")},
+                { getJdbcType(OTHER, "STRUCT")},
+                { getJdbcType(OTHER, "REF")}
+        };
+    }
+
+    private JdbcType getJdbcType(int typeCode, String typeName) {
+        JdbcType jdbcType = new JdbcType();
+        jdbcType.setTypeCode(typeCode);
+        jdbcType.setTypeName(typeName);
+        return jdbcType;
     }
 }

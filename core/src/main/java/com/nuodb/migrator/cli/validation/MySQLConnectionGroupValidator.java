@@ -52,6 +52,7 @@ public class MySQLConnectionGroupValidator extends ConnectionGroupValidator {
 
     @Override
     public void validate(CommandLine commandLine, Option option) {
+        super.validate(commandLine, option);
         String schema = getSchemaValue(commandLine);
         if (!isEmpty(schema)) {
             throw new OptionException(

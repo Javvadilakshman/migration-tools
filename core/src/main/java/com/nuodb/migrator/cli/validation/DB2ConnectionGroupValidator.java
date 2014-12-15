@@ -30,15 +30,20 @@ package com.nuodb.migrator.cli.validation;
 import com.nuodb.migrator.cli.parse.CommandLine;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
+
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class DB2ConnectionGroupValidator extends ConnectionGroupValidator {
+    
+    private transient final Logger logger = getLogger(getClass());
 
     public DB2ConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
         super(connectionGroupInfo);
@@ -51,6 +56,7 @@ public class DB2ConnectionGroupValidator extends ConnectionGroupValidator {
 
     @Override
     public void validate(CommandLine commandLine, Option option) {
+        super.validate(commandLine, option);
         String catalog = getCatalogValue(commandLine);
         if (!isEmpty(catalog)) {
             throw new OptionException(format("Unexpected option %s. DB2 doesn't supports catalogs", getCatalogOption()),
@@ -58,5 +64,13 @@ public class DB2ConnectionGroupValidator extends ConnectionGroupValidator {
             );
         }
     }
+    
+    @Override
+    protected void dbUserWarnMessage(String jdbcUsername, String jdbcPassword, String optionUsername, String optionPasssword) {
+        if(!StringUtils.equals(optionUsername, jdbcUsername) || !StringUtils.equals(optionPasssword, jdbcPassword)){
+            logger.warn(format("JDBC URL parameters user: %s passowrd: %s are not matching with commandline options --source.username %s --source.password %s.",jdbcUsername, jdbcPassword, optionUsername,optionPasssword));
+            logger.warn(format("JDBC URL parameters user: %s password: %s are used for database connection", jdbcUsername, jdbcPassword));
+        }
+    }
+    
 }
-

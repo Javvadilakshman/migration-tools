@@ -57,6 +57,7 @@ public class NuoDBConnectionGroupValidator extends ConnectionGroupValidator {
 
     @Override
     public void validate(CommandLine commandLine, Option option) {
+        super.validate(commandLine, option);
         String catalog = getCatalogValue(commandLine);
         if (!isEmpty(catalog)) {
             throw new OptionException(

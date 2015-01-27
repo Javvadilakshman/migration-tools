@@ -120,6 +120,7 @@ public class InspectionManager {
 
         InspectorResolver columnTriggerInspector = new InspectorResolver(COLUMN_TRIGGER);
         columnTriggerInspector.register(MYSQL, new MySQLColumnTriggerInspector());
+        columnTriggerInspector.register(NUODB, new NuoDBColumnTriggerInspector());
         addInspector(columnTriggerInspector);
     }
 
